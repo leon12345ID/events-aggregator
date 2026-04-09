@@ -1,7 +1,9 @@
 # init_db.py
-from sqlalchemy import create_engine
-from src.db.models import Base
 import os
+
+from sqlalchemy import create_engine
+
+from src.db.models import Base
 
 # Используем ту же переменную окружения, что и приложение
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/events_db")

@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from urllib.parse import urlencode
 from datetime import datetime, timedelta
+from urllib.parse import urlencode
 
-from src.db.database import get_db
-from src.repositories import EventRepository, TicketRepository, SyncMetadataRepository
-
-from src.clients.events_provider import EventsProviderClient
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
-from src.usecases import GetEventsWithPaginationUsecase, GetEventUsecase, SyncEventsUsecase, CreateTicketUsecase, CancelTicketUsecase
+from src.clients.events_provider import EventsProviderClient
+from src.db.database import get_db
+from src.repositories import EventRepository, SyncMetadataRepository, TicketRepository
+from src.usecases import (
+    CancelTicketUsecase,
+    CreateTicketUsecase,
+    GetEventsWithPaginationUsecase,
+    GetEventUsecase,
+    SyncEventsUsecase,
+)
 
 router = APIRouter(prefix="/api", tags=["events"])
 

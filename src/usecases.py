@@ -1,13 +1,13 @@
-from typing import Optional, List
-from src.repositories import EventRepository, TicketRepository, SyncMetadataRepository
 from src.clients.events_provider import EventsProviderClient
 from src.db.models import Event
+from src.repositories import EventRepository, SyncMetadataRepository, TicketRepository
+
 
 class GetEventsWithPaginationUsecase:
     def __init__(self, event_repo: EventRepository):
         self.event_repo = event_repo
 
-    def execute(self, date_from: Optional[str] = None, page: int = 1, page_size: int = 20):
+    def execute(self, date_from: str | None = None, page: int = 1, page_size: int = 20):
         events = self.event_repo.get_list(date_from, page, page_size)
         total = self.event_repo.count(date_from)
         return events, total
@@ -16,7 +16,7 @@ class GetEventUsecase:
     def __init__(self, event_repo: EventRepository):
         self.event_repo = event_repo
 
-    def execute(self, event_id: str) -> Optional[Event]:
+    def execute(self, event_id: str) -> Event | None:
         return self.event_repo.get_by_id(event_id)
 
 class CreateTicketUsecase:
@@ -41,7 +41,7 @@ class CancelTicketUsecase:
         self.ticket_repo.delete(ticket_id)
 
 class SyncEventsUsecase:
-    def __init__(self, client: EventsProviderClient, event_repo: EventRepository, sync_metadata_repo: SyncMetadataRepository):
+    def __init__(self, client: EventsProviderClient, event_repo: EventRepository, sync_metadata_repo: SyncMetadataRepository):# noqa: E501
         self.client = client
         self.event_repo = event_repo
         self.sync_metadata_repo = sync_metadata_repo
@@ -49,6 +49,5 @@ class SyncEventsUsecase:
     def execute(self) -> None:
         metadata = self.sync_metadata_repo.get()
         changed_at = metadata.last_changed_at if metadata else "2000-01-01"
-        events_data = self.client.get_events(changed_at=changed_at)
         # Здесь будет логика сохранения
         self.sync_metadata_repo.update(changed_at, status="completed")

@@ -1,4 +1,5 @@
-from typing import AsyncIterator, Dict, Any, Optional
+from typing import Any
+
 from src.clients.events_provider import EventsProviderClient
 
 
@@ -9,13 +10,13 @@ class EventsPaginator:
         self.client = client
         self.changed_at = changed_at
         self._current_page = 1
-        self._items: list[Dict[str, Any]] = []
+        self._items: list[dict[str, Any]] = []
         self._has_more = True
 
     def __aiter__(self):
         return self
 
-    async def __anext__(self) -> Dict[str, Any]:
+    async def __anext__(self) -> dict[str, Any]:
         """Возвращает следующее событие или останавливает итерацию"""
         if not self._items and not self._has_more:
             raise StopAsyncIteration

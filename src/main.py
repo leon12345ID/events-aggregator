@@ -1,10 +1,12 @@
 import asyncio
+
 from fastapi import FastAPI
+
 from src.api.events import router
-from src.usecases import SyncEventsUsecase
-from src.repositories import EventRepository, SyncMetadataRepository
 from src.clients.events_provider import EventsProviderClient
 from src.db.database import SessionLocal
+from src.repositories import EventRepository, SyncMetadataRepository
+from src.usecases import SyncEventsUsecase
 
 app = FastAPI(title="Events Aggregator")
 

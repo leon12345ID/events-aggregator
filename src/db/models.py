@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Boolean, JSON
+import uuid
+
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-import uuid
+
 from .database import Base
+
 
 class Place(Base):
     __tablename__ = "places"

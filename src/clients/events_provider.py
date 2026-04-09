@@ -1,5 +1,7 @@
+from typing import Any
+
 import httpx
-from typing import List, Dict, Any, Optional
+
 
 class EventsProviderClient:
     """Клиент для взаимодействия с внешним Events Provider API"""
@@ -7,7 +9,7 @@ class EventsProviderClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip('/')
 
-    async def get_events(self, changed_at: str = "2000-01-01", page: int = 1) -> List[Dict[str, Any]]:
+    async def get_events(self, changed_at: str = "2000-01-01", page: int = 1) -> list[dict[str, Any]]:
         """
         Получает одну страницу событий, изменённых после указанной даты.
         В реальном API параметры могут называться иначе (например, `cursor`, `offset`).
@@ -26,7 +28,7 @@ class EventsProviderClient:
             # Ожидаем, что API вернёт список событий в поле `results` или напрямую
             return data.get("results", data)
 
-    async def get_seats(self, event_id: str) -> List[str]:
+    async def get_seats(self, event_id: str) -> list[str]:
         """Получает список свободных мест для события"""
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(f"{self.base_url}/events/{event_id}/seats")
