@@ -1,6 +1,8 @@
 import os
+
 from .events_provider import EventsProviderClient
 from .mock_events_provider import MockEventsProviderClient
+
 
 def get_events_provider_client():
     mode = os.getenv("API_MODE", "mock")

@@ -1,4 +1,3 @@
-import os
 
 
 def setup_api_url():

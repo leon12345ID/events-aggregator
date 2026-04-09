@@ -1,5 +1,6 @@
 import asyncio
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 
 from src.api.events import router
@@ -7,6 +8,8 @@ from src.clients.events_provider import EventsProviderClient
 from src.db.database import SessionLocal
 from src.repositories import EventRepository, SyncMetadataRepository
 from src.usecases import SyncEventsUsecase
+
+load_dotenv()
 
 app = FastAPI(title="Events Aggregator")
 

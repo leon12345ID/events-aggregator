@@ -1,5 +1,6 @@
 from .events_provider import EventsProviderClient
 
+
 class MockEventsProviderClient(EventsProviderClient):
     """Заглушка для тестов и разработки"""
 
