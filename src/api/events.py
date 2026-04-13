@@ -86,7 +86,6 @@ def get_event(event_id: str, event_repo: EventRepository = Depends(get_event_rep
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
-
 @router.get("/events/{event_id}/seats")
 async def get_event_seats(
     event_id: str,
