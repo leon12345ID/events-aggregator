@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 
 from src.clients.events_provider import EventsProviderClient
+from src.clients.mock_events_provider import MockEventsProviderClient
 from src.db.database import get_db
 from src.repositories import EventRepository, SyncMetadataRepository, TicketRepository
 from src.usecases import (
