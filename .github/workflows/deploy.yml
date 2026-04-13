@@ -57,19 +57,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - - name: Send deploy request
-      - run: |
-      - REPO_LOWER="${{ needs.build.outputs.repo }}"
-      - IMAGE="ghcr.io/$REPO_LOWER:${{ github.sha }}"
-      - HTTP_CODE=$(curl -s -o response.txt -w "%{http_code}" -X POST \
-      -H "Content-Type: application/json" \
-      -H "X-API-Key: ${{ secrets.LMS_API_KEY }}" \
-      -d "{\"image\":\"$IMAGE\",\"repository\":\"$REPO_LOWER\"}" \
-      - https://lms.python-labs.ru/api/deploy-requests)
-
-      - if [ "$HTTP_CODE" != "200" ]; then
-      - echo "Deployment failed with status code $HTTP_CODE"
-      - echo "Response body:"
-      - cat response.txt
-      - exit 1
-      - fi
+      - name: Send deploy request
+        run: |
+          REPO_LOWER="${{ needs.build.outputs.repo }}"
+          IMAGE="ghcr.io/$REPO_LOWER:${{ github.sha }}"
+          HTTP_CODE=$(curl -s -o response.txt -w "%{http_code}" -X POST \
+            -H "Content-Type: application/json" \
+            -H "X-API-Key: ${{ secrets.LMS_API_KEY }}" \
+            -d "{\"image\":\"$IMAGE\",\"repository\":\"$REPO_LOWER\"}" \
+            https://lms.python-labs.ru/api/deploy-requests)
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "Deployment failed with status code $HTTP_CODE"
+            echo "Response body:"
+            cat response.txt
+            exit 1
+          fi
