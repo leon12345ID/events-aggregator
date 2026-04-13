@@ -11,12 +11,7 @@ class MockEventsProviderClient(EventsProviderClient):
                 "name": "Mock Event 1",
                 "event_time": "2025-12-31T19:00:00Z",
                 "status": "published",
-                "place": {
-                    "id": "place-1",
-                    "name": "Mock Place",
-                    "city": "Mock City",
-                    "address": "Mock Address"
-                }
+                "place": {"id": "place-1", "name": "Mock Place", "city": "Mock City", "address": "Mock Address"},
             }
         ]
 

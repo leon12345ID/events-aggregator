@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
-from src.db.models import Event, Place, Ticket, SyncMetadata
+from src.db.models import Event, Place, SyncMetadata, Ticket
 
 
 class EventRepository:
@@ -33,19 +33,21 @@ class EventRepository:
     def get_or_create_place(self, external_id: str, name: str, city: str, address: str, seats_pattern: str = None):
         place = self.session.query(Place).filter_by(external_id=external_id).first()
         if not place:
-            place = Place(
-                external_id=external_id,
-                name=name,
-                city=city,
-                address=address,
-                seats_pattern=seats_pattern
-            )
+            place = Place(external_id=external_id, name=name, city=city, address=address, seats_pattern=seats_pattern)
             self.session.add(place)
             self.session.commit()
         return place
 
-    def upsert_event(self, external_id: str, name: str, event_time, registration_deadline, status: str,
-                     number_of_visitors: int, place_id):
+    def upsert_event(
+        self,
+        external_id: str,
+        name: str,
+        event_time,
+        registration_deadline,
+        status: str,
+        number_of_visitors: int,
+        place_id,
+    ):
         event = self.session.query(Event).filter_by(external_id=external_id).first()
         if not event:
             event = Event(
@@ -55,7 +57,7 @@ class EventRepository:
                 registration_deadline=registration_deadline,
                 status=status,
                 number_of_visitors=number_of_visitors,
-                place_id=place_id
+                place_id=place_id,
             )
             self.session.add(event)
         else:
@@ -68,6 +70,7 @@ class EventRepository:
         self.session.commit()
         return event
 
+
 class TicketRepository:
     def __init__(self, session: Session):
         self.session = session
@@ -79,7 +82,7 @@ class TicketRepository:
             first_name=first_name,
             last_name=last_name,
             email=email,
-            seat=seat
+            seat=seat,
         )
         self.session.add(ticket)
         self.session.commit()
@@ -89,8 +92,8 @@ class TicketRepository:
         self.session.execute(delete(Ticket).where(Ticket.external_ticket_id == ticket_id))
         self.session.commit()
 
-class SyncMetadataRepository:
 
+class SyncMetadataRepository:
     def __init__(self, session: Session):
         self.session = session
 

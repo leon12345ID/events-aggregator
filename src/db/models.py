@@ -19,6 +19,7 @@ class Place(Base):
 
     events = relationship("Event", back_populates="place")
 
+
 class Event(Base):
     __tablename__ = "events"
 
@@ -33,6 +34,7 @@ class Event(Base):
     place_id = Column(UUID(as_uuid=True), ForeignKey("places.id"))
     place = relationship("Place", back_populates="events")
 
+
 class Ticket(Base):
     __tablename__ = "tickets"
 
@@ -44,6 +46,7 @@ class Ticket(Base):
     email = Column(String, nullable=False)
     seat = Column(String, nullable=False)
 
+
 class SyncMetadata(Base):
     __tablename__ = "sync_metadata"
 
@@ -51,4 +54,3 @@ class SyncMetadata(Base):
     last_sync_time = Column(DateTime, nullable=True)
     last_changed_at = Column(String, nullable=True)
     sync_status = Column(String, default="idle")
-

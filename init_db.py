@@ -10,10 +10,12 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/e
 
 engine = create_engine(DATABASE_URL)
 
+
 def init_db():
     print(f"Создаю таблицы в базе: {DATABASE_URL}")
     Base.metadata.create_all(bind=engine)
     print("✅ Таблицы созданы (или уже существуют)")
+
 
 if __name__ == "__main__":
     init_db()

@@ -1,15 +1,18 @@
 import asyncio
 import threading
-from fastapi import FastAPI
-from src.api.events import router
-from src.db.database import engine, Base, SessionLocal
-from src.db.models import Event, Place
 from datetime import datetime
-from src.usecases import SyncEventsUsecase
-from src.repositories import EventRepository, SyncMetadataRepository
+
+from fastapi import FastAPI
+
+from src.api.events import router
 from src.clients.events_provider import EventsProviderClient
+from src.db.database import Base, SessionLocal, engine
+from src.db.models import Event, Place
+from src.repositories import EventRepository, SyncMetadataRepository
+from src.usecases import SyncEventsUsecase
 
 app = FastAPI(title="Events Aggregator")
+
 
 def add_test_data_if_empty():
     db = SessionLocal()
@@ -21,7 +24,7 @@ def add_test_data_if_empty():
                 name="Test Place",
                 city="Test City",
                 address="Test Address",
-                seats_pattern="A1-100"
+                seats_pattern="A1-100",
             )
             db.add(place)
             db.commit()
@@ -33,7 +36,7 @@ def add_test_data_if_empty():
                 registration_deadline=datetime.now(),
                 status="published",
                 number_of_visitors=0,
-                place_id=place.id
+                place_id=place.id,
             )
             db.add(event)
             db.commit()
@@ -42,6 +45,7 @@ def add_test_data_if_empty():
             print("ℹ️ В базе уже есть события")
     finally:
         db.close()
+
 
 def sync_job():
     print("🔄 Запущена фоновая синхронизация")
@@ -58,10 +62,12 @@ def sync_job():
     finally:
         db.close()
 
+
 async def scheduler():
     while True:
         sync_job()
         await asyncio.sleep(86400)
+
 
 @app.on_event("startup")
 def startup_event():
@@ -70,7 +76,9 @@ def startup_event():
     add_test_data_if_empty()
     threading.Thread(target=lambda: asyncio.run(scheduler()), daemon=True).start()
 
+
 app.include_router(router)
+
 
 @app.get("/api/health")
 async def health_check():

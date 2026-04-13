@@ -1,5 +1,3 @@
-
-
 def setup_api_url():
     print("\n Настройка Events Provider API")
     print("Если у вас есть реальный API, введите его URL.")

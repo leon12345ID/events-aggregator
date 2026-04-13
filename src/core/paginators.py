@@ -30,10 +30,7 @@ class EventsPaginator:
 
     async def _fetch_next_page(self):
         """Загружает следующую страницу событий"""
-        events = await self.client.get_events(
-            changed_at=self.changed_at,
-            page=self._current_page
-        )
+        events = await self.client.get_events(changed_at=self.changed_at, page=self._current_page)
 
         self._items = events
         self._current_page += 1
