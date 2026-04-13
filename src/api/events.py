@@ -86,11 +86,9 @@ def get_event(event_id: str, event_repo: EventRepository = Depends(get_event_rep
         raise HTTPException(status_code=404, detail="Event not found")
     return event
 
+
 @router.get("/events/{event_id}/seats")
-async def get_event_seats(
-    event_id: str,
-    client: EventsProviderClient = Depends(get_events_provider_client)
-):
+async def get_event_seats(event_id: str, client: EventsProviderClient = Depends(get_events_provider_client)):
     cached = get_cached_seats(event_id)
     if cached is not None:
         return {"event_id": event_id, "available_seats": cached, "cached": True}
