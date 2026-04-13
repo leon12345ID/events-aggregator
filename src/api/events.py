@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api", tags=["events"])
 
 # --- Вспомогательные функции для зависимостей ---
 def get_events_provider_client() -> EventsProviderClient:
-    return EventsProviderClient("http://localhost:8001")
+    return MockEventsProviderClient()
 
 
 def get_event_repo(db: Session = Depends(get_db)) -> EventRepository:
