@@ -8,6 +8,7 @@ from src.clients.events_provider import EventsProviderClient
 from src.clients.mock_events_provider import MockEventsProviderClient
 from src.db.database import get_db
 from src.repositories import EventRepository, SyncMetadataRepository, TicketRepository
+from src.schemas import TicketCreate
 from src.usecases import (
     CancelTicketUsecase,
     CreateTicketUsecase,
@@ -114,19 +115,21 @@ def trigger_sync(
 
 
 @router.post("/tickets", status_code=201)
-def create_ticket(
-    event_id: str,
-    first_name: str,
-    last_name: str,
-    email: str,
-    seat: str,
+async def create_ticket(
+    ticket: TicketCreate,
     event_repo: EventRepository = Depends(get_event_repo),
-    ticket_repo: TicketRepository = Depends(get_ticket_repo),
+    ticket_repo: TicketRepository = Depends(get_ticket_repo)
 ):
     client = get_events_provider_client()
     usecase = CreateTicketUsecase(client, event_repo, ticket_repo)
     try:
-        ticket_id = usecase.execute(event_id, first_name, last_name, email, seat)
+        ticket_id = await usecase.execute(
+            ticket.event_id,
+            ticket.first_name,
+            ticket.last_name,
+            ticket.email,
+            ticket.seat
+        )
         return {"ticket_id": ticket_id}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
