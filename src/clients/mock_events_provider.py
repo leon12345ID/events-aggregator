@@ -2,6 +2,10 @@ from .events_provider import EventsProviderClient
 
 
 class MockEventsProviderClient(EventsProviderClient):
+    def __init__(self):
+        # Вызываем конструктор родителя с фиктивным URL
+        super().__init__("http://mock")
+
     async def get_events(self, changed_at: str = "2000-01-01", page: int = 1):
         return []
 
