@@ -13,7 +13,6 @@ from src.usecases import (
     CancelTicketUsecase,
     CreateTicketUsecase,
     GetEventsWithPaginationUsecase,
-    GetEventUsecase,
     SyncEventsUsecase,
 )
 
@@ -79,29 +78,29 @@ def get_events(
 
     return {"count": total, "next": next_url, "previous": previous_url, "results": events}
 
-
-@router.get("/events/{event_id}")
-def get_event(event_id: str, event_repo: EventRepository = Depends(get_event_repo)):
-    usecase = GetEventUsecase(event_repo)
-    event = usecase.execute(event_id)
+@router.get("/events/{event_id}/seats")
+async def get_event_seats(
+    event_id: str,
+    event_repo: EventRepository = Depends(get_event_repo),
+    client: EventsProviderClient = Depends(get_events_provider_client)
+):
+    # 1. Проверяем, существует ли событие в нашей БД
+    event = await event_repo.get_by_id(event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
-    return event
 
-
-@router.get("/events/{event_id}/seats")
-async def get_event_seats(event_id: str, client: EventsProviderClient = Depends(get_events_provider_client)):
+    # 2. Проверяем кэш
     cached = get_cached_seats(event_id)
     if cached is not None:
         return {"event_id": event_id, "available_seats": cached, "cached": True}
 
+    # 3. Если нет в кэше — идём во внешний API (или мок)
     try:
         seats = await client.get_seats(event_id)
         set_cached_seats(event_id, seats)
         return {"event_id": event_id, "available_seats": seats, "cached": False}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка получения мест: {str(e)}")
-
 
 @router.post("/sync/trigger")
 def trigger_sync(
