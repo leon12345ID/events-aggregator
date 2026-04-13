@@ -26,7 +26,11 @@ class EventRepository:
         return result.scalar_one()
 
     def get_by_id(self, event_id: str) -> Event | None:
-        query = select(Event).options(selectinload(Event.place)).where(Event.id == uuid.UUID(event_id))
+        try:
+            uid = uuid.UUID(event_id)
+        except ValueError:
+            return None
+        query = select(Event).options(selectinload(Event.place)).where(Event.id == uid)
         result = self.session.execute(query)
         return result.scalar_one_or_none()
 
