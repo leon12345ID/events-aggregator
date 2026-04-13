@@ -94,7 +94,7 @@ def get_event_seats(event_id: str, client: EventsProviderClient = Depends(get_ev
         return {"event_id": event_id, "available_seats": cached, "cached": True}
 
     try:
-        seats = client.get_seats(event_id)
+        seats = await client.get_seats(event_id)
         set_cached_seats(event_id, seats)
         return {"event_id": event_id, "available_seats": seats, "cached": False}
     except Exception as e:
