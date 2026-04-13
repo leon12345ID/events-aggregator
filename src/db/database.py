@@ -1,24 +1,26 @@
 import os
+
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Собираем URL из переменных LMS
-POSTGRES_CONNECTION_STRING = os.getenv("POSTGRES_CONNECTION_STRING")
-POSTGRES_DATABASE_NAME = os.getenv("POSTGRES_DATABASE_NAME")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRESS_PORT = os.getenv("POSTGRESS_PORT")  # опечатка в названии переменной, но оставим как есть
+# Берём переменные из LMS
+user = os.getenv("POSTGRES_USERNAME")
+password = os.getenv("POSTGRES_PASSWORD")
+host = os.getenv("POSTGRES_HOST")
+port = os.getenv("POSTGRES_PORT")
+db_name = os.getenv("POSTGRES_DATABASE_NAME")
 
-# Если есть готовая строка подключения — используем её
-if POSTGRES_CONNECTION_STRING:
-    DATABASE_URL = POSTGRES_CONNECTION_STRING
-else:
-    # Иначе собираем из частей
-    DATABASE_URL = f"postgresql://{POSTGRES_HOST}:{POSTGRESS_PORT}/{POSTGRES_DATABASE_NAME}"
+# Если какой-то переменной нет — упадём с понятной ошибкой
+if not all([user, password, host, port, db_name]):
+    raise ValueError("Missing required PostgreSQL environment variables")
+
+DATABASE_URL = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
 
 engine = create_engine(DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
