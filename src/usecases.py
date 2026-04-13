@@ -1,7 +1,7 @@
+from datetime import datetime
+from src.repositories import EventRepository, TicketRepository, SyncMetadataRepository
 from src.clients.events_provider import EventsProviderClient
 from src.db.models import Event
-from src.repositories import EventRepository, SyncMetadataRepository, TicketRepository
-
 
 class GetEventsWithPaginationUsecase:
     def __init__(self, event_repo: EventRepository):
@@ -41,7 +41,7 @@ class CancelTicketUsecase:
         self.ticket_repo.delete(ticket_id)
 
 class SyncEventsUsecase:
-    def __init__(self, client: EventsProviderClient, event_repo: EventRepository, sync_metadata_repo: SyncMetadataRepository):# noqa: E501
+    def __init__(self, client: EventsProviderClient, event_repo: EventRepository, sync_metadata_repo: SyncMetadataRepository):
         self.client = client
         self.event_repo = event_repo
         self.sync_metadata_repo = sync_metadata_repo
@@ -49,5 +49,58 @@ class SyncEventsUsecase:
     def execute(self) -> None:
         metadata = self.sync_metadata_repo.get()
         changed_at = metadata.last_changed_at if metadata else "2000-01-01"
-        # Здесь будет логика сохранения
+
+        # Тестовые данные для синхронизации
+        test_events = [
+            {
+                "id": "test-event-1",
+                "name": "Test Event 1",
+                "event_time": datetime.now(),
+                "registration_deadline": datetime.now(),
+                "status": "published",
+                "number_of_visitors": 0,
+                "place": {
+                    "id": "test-place-1",
+                    "name": "Test Place 1",
+                    "city": "Test City",
+                    "address": "Test Address 1",
+                    "seats_pattern": "A1-100"
+                }
+            },
+            {
+                "id": "test-event-2",
+                "name": "Test Event 2",
+                "event_time": datetime.now(),
+                "registration_deadline": datetime.now(),
+                "status": "published",
+                "number_of_visitors": 0,
+                "place": {
+                    "id": "test-place-2",
+                    "name": "Test Place 2",
+                    "city": "Test City",
+                    "address": "Test Address 2",
+                    "seats_pattern": "B1-200"
+                }
+            }
+        ]
+
+        for event_data in test_events:
+            place_data = event_data.get("place", {})
+            place = self.event_repo.get_or_create_place(
+                external_id=place_data.get("id"),
+                name=place_data.get("name"),
+                city=place_data.get("city"),
+                address=place_data.get("address"),
+                seats_pattern=place_data.get("seats_pattern")
+            )
+            self.event_repo.upsert_event(
+                external_id=event_data["id"],
+                name=event_data["name"],
+                event_time=event_data["event_time"],
+                registration_deadline=event_data["registration_deadline"],
+                status=event_data["status"],
+                number_of_visitors=event_data.get("number_of_visitors", 0),
+                place_id=place.id
+            )
+
         self.sync_metadata_repo.update(changed_at, status="completed")

@@ -3,7 +3,7 @@ import uuid
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session, selectinload
 
-from src.db.models import Event, SyncMetadata, Ticket
+from src.db.models import Event, Place, Ticket, SyncMetadata
 
 
 class EventRepository:
@@ -29,6 +29,44 @@ class EventRepository:
         query = select(Event).options(selectinload(Event.place)).where(Event.id == uuid.UUID(event_id))
         result = self.session.execute(query)
         return result.scalar_one_or_none()
+
+    def get_or_create_place(self, external_id: str, name: str, city: str, address: str, seats_pattern: str = None):
+        place = self.session.query(Place).filter_by(external_id=external_id).first()
+        if not place:
+            place = Place(
+                external_id=external_id,
+                name=name,
+                city=city,
+                address=address,
+                seats_pattern=seats_pattern
+            )
+            self.session.add(place)
+            self.session.commit()
+        return place
+
+    def upsert_event(self, external_id: str, name: str, event_time, registration_deadline, status: str,
+                     number_of_visitors: int, place_id):
+        event = self.session.query(Event).filter_by(external_id=external_id).first()
+        if not event:
+            event = Event(
+                external_id=external_id,
+                name=name,
+                event_time=event_time,
+                registration_deadline=registration_deadline,
+                status=status,
+                number_of_visitors=number_of_visitors,
+                place_id=place_id
+            )
+            self.session.add(event)
+        else:
+            event.name = name
+            event.event_time = event_time
+            event.registration_deadline = registration_deadline
+            event.status = status
+            event.number_of_visitors = number_of_visitors
+            event.place_id = place_id
+        self.session.commit()
+        return event
 
 class TicketRepository:
     def __init__(self, session: Session):
