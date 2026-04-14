@@ -25,7 +25,7 @@ class EventRepository:
         result = self.session.execute(query)
         return result.scalar_one()
 
-    def get_list_with_count(self, date_from: Optional[str] = None, page: int = 1, page_size: int = 20):
+    def get_list_with_count(self, date_from: str | None = None, page: int = 1, page_size: int = 20):
         events = self.get_list(date_from, page, page_size)
         total = self.count(date_from)
         return events, total
