@@ -68,13 +68,21 @@ def get_event(event_id: str, event_repo: EventRepository = Depends(get_event_rep
     return event
 
 @router.get("/events/{event_id}/seats")
-def get_event_seats(event_id: str):
-    # Проверка существования события (упрощённо)
-    # В реальном коде здесь был бы вызов репозитория
+def get_event_seats(
+    event_id: str,
+    event_repo: EventRepository = Depends(get_event_repo),
+):
+    # 1. Проверяем, существует ли событие в БД
+    event = event_repo.get_by_id(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    # 2. Проверяем кэш
     cached = get_cached_seats(event_id)
     if cached is not None:
         return {"event_id": event_id, "available_seats": cached, "cached": True}
 
+    # 3. Если нет в кэше — генерируем список мест
     seats = ["A1", "A2", "B1", "B2"]
     set_cached_seats(event_id, seats)
     return {"event_id": event_id, "available_seats": seats, "cached": False}
