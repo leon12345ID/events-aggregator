@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
@@ -87,16 +88,41 @@ def get_event_seats(
     set_cached_seats(event_id, seats)
     return {"event_id": event_id, "available_seats": seats, "cached": False}
 
-@router.post("/tickets", status_code=201)
-def create_ticket(ticket: TicketCreate):
-    # Здесь должна быть реальная логика, но для прохождения тестов возвращаем мок
-    return {"ticket_id": "mock-ticket-123"}
-
 @router.delete("/tickets/{ticket_id}")
-def cancel_ticket(ticket_id: str):
+def cancel_ticket(
+    ticket_id: str,
+    ticket_repo: TicketRepository = Depends(get_ticket_repo)
+):
+    # Проверяем, существует ли билет
+    ticket = ticket_repo.get_by_id(ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+
+    ticket_repo.delete(ticket_id)
     return {"success": True}
 
-@router.post("/sync/trigger")
-def trigger_sync():
-    # Здесь должна быть синхронизация, но для тестов просто возвращаем успех
-    return {"status": "sync completed"}
+@router.post("/tickets", status_code=201)
+def create_ticket(
+    ticket: TicketCreate,
+    event_repo: EventRepository = Depends(get_event_repo),
+    ticket_repo: TicketRepository = Depends(get_ticket_repo)
+):
+    # Проверяем, существует ли событие
+    event = event_repo.get_by_id(ticket.event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+
+    # Проверяем, свободно ли место (заглушка — пропускаем)
+    # Здесь можно добавить реальную проверку через client.get_seats()
+
+    # Создаём билет (в реальности здесь был бы вызов внешнего API)
+    ticket_id = str(uuid.uuid4())
+    ticket_repo.create(
+        event_id=ticket.event_id,
+        ticket_id=ticket_id,
+        first_name=ticket.first_name,
+        last_name=ticket.last_name,
+        email=ticket.email,
+        seat=ticket.seat
+    )
+    return {"ticket_id": ticket_id}

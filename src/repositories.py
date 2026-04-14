@@ -101,6 +101,10 @@ class TicketRepository:
         self.session.execute(delete(Ticket).where(Ticket.external_ticket_id == ticket_id))
         self.session.commit()
 
+    def get_by_id(self, ticket_id: str) -> Ticket | None:
+        result = self.session.execute(select(Ticket).where(Ticket.external_ticket_id == ticket_id))
+        return result.scalar_one_or_none()
+
 
 class SyncMetadataRepository:
     def __init__(self, session: Session):
