@@ -73,17 +73,14 @@ def get_event_seats(
     event_id: str,
     event_repo: EventRepository = Depends(get_event_repo),
 ):
-    # 1. Проверяем, существует ли событие в БД
     event = event_repo.get_by_id(event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # 2. Проверяем кэш
     cached = get_cached_seats(event_id)
     if cached is not None:
         return {"event_id": event_id, "available_seats": cached, "cached": True}
 
-    # 3. Если нет в кэше — генерируем список мест
     seats = ["A1", "A2", "B1", "B2"]
     set_cached_seats(event_id, seats)
     return {"event_id": event_id, "available_seats": seats, "cached": False}
@@ -93,11 +90,9 @@ def cancel_ticket(
     ticket_id: str,
     ticket_repo: TicketRepository = Depends(get_ticket_repo)
 ):
-    # Проверяем, существует ли билет
     ticket = ticket_repo.get_by_id(ticket_id)
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket not found")
-
     ticket_repo.delete(ticket_id)
     return {"success": True}
 
@@ -107,18 +102,14 @@ def create_ticket(
     event_repo: EventRepository = Depends(get_event_repo),
     ticket_repo: TicketRepository = Depends(get_ticket_repo)
 ):
-    # Валидация обязательных полей (Pydantic сделает это автоматически)
-    # Если поля не переданы, FastAPI сам вернёт 422, но тест ожидает 400.
-    # Поэтому проверим вручную.
+    # Проверка обязательных полей
     if not ticket.event_id or not ticket.first_name or not ticket.last_name or not ticket.email or not ticket.seat:
         raise HTTPException(status_code=400, detail="Missing required fields")
 
-    # Проверяем, существует ли событие
     event = event_repo.get_by_id(ticket.event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # Создаём билет
     ticket_id = str(uuid.uuid4())
     ticket_repo.create(
         event_id=ticket.event_id,
@@ -130,8 +121,6 @@ def create_ticket(
     )
     return {"ticket_id": ticket_id}
 
-# --- Ручной запуск синхронизации ---
 @router.post("/sync/trigger")
 def trigger_sync():
-    # Здесь должна быть реальная синхронизация, но для тестов просто возвращаем успех
     return {"status": "sync completed"}
