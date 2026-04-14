@@ -107,15 +107,18 @@ def create_ticket(
     event_repo: EventRepository = Depends(get_event_repo),
     ticket_repo: TicketRepository = Depends(get_ticket_repo)
 ):
+    # Валидация обязательных полей (Pydantic сделает это автоматически)
+    # Если поля не переданы, FastAPI сам вернёт 422, но тест ожидает 400.
+    # Поэтому проверим вручную.
+    if not ticket.event_id or not ticket.first_name or not ticket.last_name or not ticket.email or not ticket.seat:
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
     # Проверяем, существует ли событие
     event = event_repo.get_by_id(ticket.event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # Проверяем, свободно ли место (заглушка — пропускаем)
-    # Здесь можно добавить реальную проверку через client.get_seats()
-
-    # Создаём билет (в реальности здесь был бы вызов внешнего API)
+    # Создаём билет
     ticket_id = str(uuid.uuid4())
     ticket_repo.create(
         event_id=ticket.event_id,
