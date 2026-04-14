@@ -102,6 +102,7 @@ def create_ticket(
     event_repo: EventRepository = Depends(get_event_repo),
     ticket_repo: TicketRepository = Depends(get_ticket_repo)
 ):
+    print(f"=== TICKET REQUEST: {ticket.dict()} ===")
     # Проверка обязательных полей
     if not ticket.event_id or not ticket.first_name or not ticket.last_name or not ticket.email or not ticket.seat:
         raise HTTPException(status_code=400, detail="Missing required fields")
